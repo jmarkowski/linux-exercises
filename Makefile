@@ -3,6 +3,7 @@ CFLAGS = -Wall
 
 PROG += tee
 PROG += checklen
+PROG += fdvsfp
 
 SRC = $(addsuffix .c, $(PROG))
 OBJ = $(addsuffix .o, $(PROG))
