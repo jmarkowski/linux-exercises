@@ -4,6 +4,7 @@ CFLAGS = -Wall
 PROG += tee
 PROG += checklen
 PROG += fdvsfp
+PROG += userinfo
 
 SRC = $(addsuffix .c, $(PROG))
 OBJ = $(addsuffix .o, $(PROG))
