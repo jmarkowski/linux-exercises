@@ -5,6 +5,7 @@ PROG += tee
 PROG += checklen
 PROG += fdvsfp
 PROG += userinfo
+PROG += sysinfo
 
 SRC = $(addsuffix .c, $(PROG))
 OBJ = $(addsuffix .o, $(PROG))
