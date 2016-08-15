@@ -1,11 +1,12 @@
 CC = gcc
 CFLAGS = -Wall
 
-PROG += tee
+PROG += env
 PROG += checklen
 PROG += fdvsfp
-PROG += userinfo
 PROG += sysinfo
+PROG += tee
+PROG += userinfo
 
 SRC = $(addsuffix .c, $(PROG))
 OBJ = $(addsuffix .o, $(PROG))
