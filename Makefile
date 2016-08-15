@@ -5,6 +5,7 @@ PROG += env
 PROG += exit
 PROG += checklen
 PROG += fdvsfp
+PROG += resinfo
 PROG += sysinfo
 PROG += tee
 PROG += userinfo
