@@ -1,10 +1,11 @@
 CC = gcc
 CFLAGS = -Wall
 
+PROG += checklen
 PROG += env
 PROG += exit
-PROG += checklen
 PROG += fdvsfp
+PROG += fork
 PROG += mymalloc
 PROG += resinfo
 PROG += sysinfo
