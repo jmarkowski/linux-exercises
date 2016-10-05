@@ -4,6 +4,7 @@ CFLAGS = -Wall
 PROG += checklen
 PROG += env
 PROG += exit
+PROG += exitstatus
 PROG += fdvsfp
 PROG += fork
 PROG += mymalloc
