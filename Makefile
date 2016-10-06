@@ -2,7 +2,7 @@ CC = gcc
 CFLAGS = -Wall
 
 PROG += checklen
-PROG += env
+PROG += envarg
 PROG += exit
 PROG += exitstatus
 PROG += fdvsfp
