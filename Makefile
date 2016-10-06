@@ -3,6 +3,7 @@ CFLAGS = -Wall
 
 PROG += checklen
 PROG += envarg
+PROG += exec
 PROG += exit
 PROG += exitstatus
 PROG += fdvsfp
