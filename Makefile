@@ -11,6 +11,7 @@ PROG += fork
 PROG += mymalloc
 PROG += pid
 PROG += resinfo
+PROG += signals
 PROG += sysinfo
 PROG += tee
 PROG += userinfo
