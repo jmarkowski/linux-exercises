@@ -9,6 +9,7 @@ PROG += exitstatus
 PROG += fdvsfp
 PROG += fork
 PROG += mymalloc
+PROG += pid
 PROG += resinfo
 PROG += sysinfo
 PROG += tee
