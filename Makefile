@@ -14,6 +14,7 @@ PROG += resinfo
 PROG += signals
 PROG += sysinfo
 PROG += tee
+PROG += termcolors
 PROG += userinfo
 
 SRC = $(addsuffix .c, $(PROG))
