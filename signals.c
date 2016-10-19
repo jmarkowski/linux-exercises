@@ -1,12 +1,24 @@
 #include <stdio.h>
 #include <stdlib.h> /* for system */
-#include <unistd.h> /* for pause */
+#include <unistd.h> /* for pause, alarm */
 #include <signal.h> /* for signal */
+#include <errno.h>  /* for errno */
+#include <string.h> /* for strsignal */
 
-#define SIG_CASE(SIG) case SIG: printf(" Received " #SIG "\n"); break;
+#define SIG_CASE(SIG) \
+    case SIG: \
+        printf("> Received %-10s- %-25s (Saved errno: %s)\n", #SIG, \
+               strsignal(SIG), strerror(errsv)); \
+    break;
 
 void signalHandler(int signo)
 {
+    /*
+     * Always preserve the errno value within a signal handler and revert it
+     * back when finished
+     */
+    int errsv = errno;
+
     switch (signo) {
     SIG_CASE(SIGHUP)
     SIG_CASE(SIGINT)
@@ -49,6 +61,8 @@ void signalHandler(int signo)
         printf("Should never happen\n");
         break;
     }
+
+    errno = errsv;
 }
 
 /*
@@ -60,7 +74,7 @@ void signalHandler(int signo)
     if (signal(SIG, signalHandler) == SIG_ERR) { \
         printf("Cannot catch " #SIG "\n"); \
     } else { \
-        printf("Installed signal handler for " #SIG "\n"); \
+        printf("Installed handler for %-10s- %s\n", #SIG, strsignal(SIG)); \
     }
 
 static void installSignalHandlers(void)
@@ -99,6 +113,8 @@ static void installSignalHandlers(void)
     printf("Finished signal installs\n");
 }
 
+#define RED_BOLD "\x1B[1;31m"
+#define NORMAL   "\x1B[0m"
 int main(void)
 {
     pid_t pid = getpid();
@@ -113,9 +129,12 @@ int main(void)
     printf("or...\n");
     printf("Press <Ctrl-\\> (SIGQUIT)\n");
     printf("Press <Ctrl-C> (SIGINT)\n\n");
-    printf("Stop process with \"kill -KILL %d\"\n\n", pid);
+    printf(RED_BOLD "Stop this process with \"kill -KILL %d\"" NORMAL "\n\n", pid);
+
+    errno = 0; /* Clear the error */
 
     for (;;) {
+        alarm(2);
         pause(); /* suspend thread until a signal is received */
     }
 
