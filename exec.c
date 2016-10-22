@@ -58,7 +58,14 @@ int main(void)
 
     pid = fork();
 
-    setenv("PATH", "/home/markowski/github/linux-exercises.git", 1);
+    char cwd[255];
+
+    if (getcwd(cwd, sizeof(cwd)) != NULL) {
+        setenv("PATH", "/home/markowski/github/linux-exercises.git", 1);
+    } else {
+        printf("Unable to get the current working directory\n");
+        exit(1);
+    }
 
     if (pid < 0) {
         printf("fork error\n");
