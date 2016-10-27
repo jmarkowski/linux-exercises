@@ -34,6 +34,8 @@ static unsigned countLineLenViolations(char *filename, unsigned maxLineLen)
         }
     }
 
+    fclose(fp);
+
     return numViolations;
 }
 
@@ -42,18 +44,22 @@ int main(int argc, char **argv)
     unsigned maxLineLen = 0;
     unsigned numViolations;
     char *filename;
+    int k;
 
     if (argc < 3) {
         printf("Usage: %s <file> <#max-len>\n", argv[0]);
         exit(1);
     }
 
-    filename   = argv[1];
-    maxLineLen = atoi(argv[2]);
+    maxLineLen = atoi(argv[argc - 1]); /* Last argument */
+    for (k = 1; k < argc - 1; k++) {
+        filename = argv[k];
+        printf("Checking %s...\n", filename);
 
-    numViolations = countLineLenViolations(filename, maxLineLen);
+        numViolations = countLineLenViolations(filename, maxLineLen);
 
-    printf("Number of lines exceeding %u: %u\n", maxLineLen, numViolations);
+        printf("Number of lines exceeding %u: %u\n", maxLineLen, numViolations);
+    }
 
     return 0;
 }
