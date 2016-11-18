@@ -12,6 +12,7 @@ PROG += mymalloc
 PROG += pid
 PROG += resinfo
 PROG += signals
+PROG += sleep
 PROG += sysinfo
 PROG += tee
 PROG += termcolors
