@@ -6,10 +6,9 @@
 
 #define HOST_NAME_MAX 64
 
-int main(void)
+void printUnameInfo(void)
 {
     struct utsname *sysinfo;
-    char hostname[HOST_NAME_MAX];
 
     sysinfo = (struct utsname *) malloc(sizeof(struct utsname));
 
@@ -23,15 +22,24 @@ int main(void)
         perror("Failed");
         exit(1);
     }
+}
+
+void printHostname(void)
+{
+    char hostname[HOST_NAME_MAX];
 
     if (gethostname(hostname, HOST_NAME_MAX) == 0) {
-        if (strcmp(hostname, sysinfo->nodename) != 0) {
-            printf("%-20s: %s\n", "Hostname", hostname);
-        }
+        printf("%-20s: %s\n", "Hostname", hostname);
     } else {
         perror("Failed");
         exit(1);
     }
+}
+
+int main(void)
+{
+    printUnameInfo();
+    printHostname();
 
     exit(0);
 }
