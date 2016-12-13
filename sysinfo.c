@@ -14,11 +14,11 @@ int main(void)
     sysinfo = (struct utsname *) malloc(sizeof(struct utsname));
 
     if (uname(sysinfo) == 0) {
-        printf("Operating System:   %s\n", sysinfo->sysname);
-        printf("Node name:          %s\n", sysinfo->nodename);
-        printf("Release of OS:      %s\n", sysinfo->release);
-        printf("Version of release: %s\n", sysinfo->version);
-        printf("Hardware type:      %s\n", sysinfo->machine);
+        printf("%-20s: %s\n", "Operating system", sysinfo->sysname);
+        printf("%-20s: %s\n", "Node name", sysinfo->nodename);
+        printf("%-20s: %s\n", "Release of OS", sysinfo->release);
+        printf("%-20s: %s\n", "Version of release", sysinfo->version);
+        printf("%-20s: %s\n", "Hardware type", sysinfo->machine);
     } else {
         perror("Failed");
         exit(1);
@@ -26,12 +26,12 @@ int main(void)
 
     if (gethostname(hostname, HOST_NAME_MAX) == 0) {
         if (strcmp(hostname, sysinfo->nodename) != 0) {
-            printf("Hostname:           %s\n", hostname);
+            printf("%-20s: %s\n", "Hostname", hostname);
         }
     } else {
         perror("Failed");
         exit(1);
     }
 
-    return 0;
+    exit(0);
 }
