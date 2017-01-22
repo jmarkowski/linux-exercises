@@ -16,12 +16,16 @@ PROG += sleep
 PROG += sysinfo
 PROG += tee
 PROG += termcolors
+PROG += threads
 PROG += userinfo
 
 SRC = $(addsuffix .c, $(PROG))
 OBJ = $(addsuffix .o, $(PROG))
 
 all: $(OBJ)
+
+threads.o: threads.c
+	$(CC) $(CFLAGS) -pthread -o $@ $<
 
 %.o: %.c
 	$(CC) $(CFLAGS) -o $@ $<
