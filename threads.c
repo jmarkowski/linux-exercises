@@ -3,6 +3,21 @@
 #include <unistd.h>     /* for sleep */
 #include <pthread.h>
 
+/*
+ * Thread vs Process function analogues
+ *
+ * FOC = flow of control
+ *
+ * Process | Thread               | Description
+ * ----------------------------------------------------------------------------
+ * fork    | pthread_create       | create new FOC
+ * exit    | pthread_exit         | exit from existing FOC
+ * waitpid | pthread_join         | get exit status from FOC
+ * atexit  | pthread_cleanup_push | register functions to be called at exit FOC
+ * getpid  | pthread_self         | get ID for FOC
+ * abort   | pthread_cancel       | request abnormal termination of FOC
+ */
+
 void printThreadInfo(const char *name)
 {
     pid_t     pid = getpid();
