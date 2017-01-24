@@ -9,6 +9,7 @@ PROG += exitstatus
 PROG += fdvsfp
 PROG += fork
 PROG += mymalloc
+PROG += mutexes
 PROG += pid
 PROG += resinfo
 PROG += signals
@@ -25,6 +26,9 @@ OBJ = $(addsuffix .o, $(PROG))
 all: $(OBJ)
 
 threads.o: threads.c
+	$(CC) $(CFLAGS) -pthread -o $@ $<
+
+mutexes.o: mutexes.c
 	$(CC) $(CFLAGS) -pthread -o $@ $<
 
 %.o: %.c
