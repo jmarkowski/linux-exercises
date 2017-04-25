@@ -8,6 +8,7 @@ PROG += exit
 PROG += exitstatus
 PROG += fdvsfp
 PROG += fork
+PROG += getenv
 PROG += mymalloc
 PROG += mutexes
 PROG += pid
@@ -29,6 +30,9 @@ threads.o: threads.c
 	$(CC) $(CFLAGS) -pthread -o $@ $<
 
 mutexes.o: mutexes.c
+	$(CC) $(CFLAGS) -pthread -o $@ $<
+
+getenv.o: getenv.c
 	$(CC) $(CFLAGS) -pthread -o $@ $<
 
 %.o: %.c
