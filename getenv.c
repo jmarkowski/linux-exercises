@@ -2,6 +2,7 @@
 #include <string.h>
 #include <errno.h>
 #include <pthread.h>
+#include <stdlib.h>
 
 extern char **environ;
 
@@ -30,7 +31,7 @@ char * getenv(const char *name)
 }
 
 /*******************************************************************************
- * Reentrant implementation of getenv
+ * Reentrant implementation of getenv (but incompatible implementation)
  ******************************************************************************/
 pthread_mutex_t envMtx;
 
@@ -81,6 +82,60 @@ int getenv_r(const char *name, char *buf, int buflen)
     return ENOENT; /* Doesn't exist */
 }
 
+/*******************************************************************************
+ * Thread-safe, compatible, version of getenv
+ *
+ * This implementation is done using thread keys to hold thread-specific data.
+ * Thread keys are a mechanism for storing and finding data associated with a
+ * particular thread.
+ ******************************************************************************/
+static pthread_key_t key;
+static pthread_once_t initDone2 = PTHREAD_ONCE_INIT;
+static pthread_mutex_t envMtx2 = PTHREAD_MUTEX_INITIALIZER;
+
+static void threadInit2(void)
+{
+    /* free() is the destructor for key when the thread exits */
+    pthread_key_create(&key, free);
+}
+
+char *getenv2(const char *name)
+{
+    int k, len;
+
+    char *envbuf2;
+
+    pthread_once(&initDone2, threadInit2);
+    pthread_mutex_lock(&envMtx2);
+
+    envbuf2 = (char *) pthread_getspecific(key);
+
+    if (envbuf2 == NULL) {
+        envbuf2 = malloc(MAX_STRING_SIZE);
+
+        if (envbuf2 == NULL) {
+            pthread_mutex_unlock(&envMtx2);
+            return NULL;
+        }
+        pthread_setspecific(key, envbuf);
+    }
+
+    /* The following is practically the same as getenv() */
+    len = strlen(name);
+
+    for (k = 0; environ[k] != NULL; k++) {
+        /* return the value after the '=' */
+        if ((strncmp(name, environ[k], len) == 0) && (environ[k][len] == '=')) {
+            strncpy(envbuf2, &environ[k][len+1], MAX_STRING_SIZE - 1);
+            pthread_mutex_unlock(&envMtx2);
+            return envbuf2;
+        }
+    }
+    pthread_mutex_unlock(&envMtx2);
+
+    return NULL;
+}
+
 /******************************************************************************/
 int main(void)
 {
@@ -97,6 +152,9 @@ int main(void)
     else {
         printf("REENTRANT    : FAILED\n");
     }
+
+    envstr = getenv2("HOME");
+    printf("REENTRANT (compatible): %s\n", envstr);
 
     return 0;
 }
