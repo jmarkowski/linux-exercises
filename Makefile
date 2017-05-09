@@ -2,6 +2,7 @@ CC = gcc
 CFLAGS = -Wall
 
 PROG += checklen
+PROG += daemon
 PROG += envarg
 PROG += exec
 PROG += exit
