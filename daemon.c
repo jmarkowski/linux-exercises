@@ -25,11 +25,14 @@ void daemonize(const char *cmd)
     struct sigaction    sa;
     pid_t               pid;
     int k, fd0, fd1, fd2;
+    mode_t prevUMask;
 
     /*
      * Clear file creation mask and set it to a known value.
      */
-    umask(0);
+    prevUMask = umask(0);
+
+    printf("Previous umask: %u\n", prevUMask);
 
     /*
      * Get the maximum number of file descriptors.
@@ -40,7 +43,18 @@ void daemonize(const char *cmd)
 
     /*
      * Create a new session and become the session leader to lose controlling
-     * TTY
+     * TTY.
+     *
+     * A session is a collection ofone or more process groups. e.g. calling:
+     * $ proc1 | proc2    # This is a process group consisting of proc1 and
+     *                    # proc2
+     *
+     * Calling setsid() causes three things:
+     * 1. The forked child process becomes a session leader.
+     * 2. The process will becom ethe process group leader of a new process
+     *    group.
+     * 3. The process has no controlling terminal (if it had one before the
+     *    call, the association between it and the terminal is broken)
      */
     if ((pid = fork()) < 0) {
         ABORT("%s: can't fork", cmd);
@@ -93,6 +107,10 @@ void daemonize(const char *cmd)
 
     /*
      * Attach file descriptors 0, 1, and 2 to /dev/null.
+     *
+     * The reason for this is that tehere is nowhere for output to be displayed,
+     * nor is there anywhere to receive input from an interactive user. The
+     * daemon runs in the background.
      */
     fd0 = open("/dev/null", O_RDWR);
     fd1 = dup(0);
@@ -100,11 +118,16 @@ void daemonize(const char *cmd)
 
     /*
      * Initialize the log file.
+     *
+     * You can read the contents with $ journalctl -xe
      */
     openlog(cmd, LOG_CONS, LOG_DAEMON);
 
+    syslog(LOG_INFO, "DAEMON: file descriptors: %d, %d, %d", fd0, fd1, fd2);
+
     if (fd0 != 0 || fd1 != 1 || fd2 != 2) {
-        syslog(LOG_ERR, "unexpected file descriptors %d %d %d", fd0, fd1, fd2);
+        syslog(LOG_ERR, "DAEMON: Unexpected file descriptors %d %d %d",
+               fd0, fd1, fd2);
         exit(1);
     }
 }
