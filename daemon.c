@@ -120,6 +120,17 @@ void daemonize(const char *cmd)
      * Initialize the log file.
      *
      * You can read the contents with $ journalctl -xe
+     *
+     * Valid options:
+     *  LOG_CONS
+     *  LOG_NDELAY
+     *  LOG_NOWAIT
+     *  LOG_ODELAY
+     *  LOG_PERROR
+     *  LOG_PID
+     *
+     * Valid facility:
+     *  LOG_DAEMON (amoung others)
      */
     openlog(cmd, LOG_CONS, LOG_DAEMON);
 
@@ -130,6 +141,8 @@ void daemonize(const char *cmd)
                fd0, fd1, fd2);
         exit(1);
     }
+
+    /*** Daemon initialization is finished ***/
 
     /*
      * The various syslog levels
@@ -143,7 +156,10 @@ void daemonize(const char *cmd)
     syslog(LOG_ALERT,   "DAEMON: LOG_ALERT (condition that must be fixed immediately)");
     syslog(LOG_EMERG,   "DAEMON: LOG_EMERG (emergency, system is unusable - highest priority)");
 
-    syslog(LOG_INFO, "DAEMON: DONE!");
+    /*
+     * %m is replaced with error message string corresponding to value of errno
+     */
+    syslog(LOG_INFO, "DAEMON: DONE! (errno = %m)");
 }
 
 int main(int argc, char *argv[])
