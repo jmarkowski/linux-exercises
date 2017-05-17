@@ -130,6 +130,20 @@ void daemonize(const char *cmd)
                fd0, fd1, fd2);
         exit(1);
     }
+
+    /*
+     * The various syslog levels
+     */
+    syslog(LOG_DEBUG,   "DAEMON: LOG_DEBUG (debug - lowest priority)");
+    syslog(LOG_INFO,    "DAEMON: LOG_INFO (informational message)");
+    syslog(LOG_NOTICE,  "DAEMON: LOG_NOTICE (normal, but significant condition)");
+    syslog(LOG_WARNING, "DAEMON: LOG_WARNING (warning condition)");
+    syslog(LOG_ERR,     "DAEMON: LOG_ERR (error condition)");
+    syslog(LOG_CRIT,    "DAEMON: LOG_CRIT (critical condition, e.g. hard device error)");
+    syslog(LOG_ALERT,   "DAEMON: LOG_ALERT (condition that must be fixed immediately)");
+    syslog(LOG_EMERG,   "DAEMON: LOG_EMERG (emergency, system is unusable - highest priority)");
+
+    syslog(LOG_INFO, "DAEMON: DONE!");
 }
 
 int main(int argc, char *argv[])
