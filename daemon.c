@@ -6,6 +6,9 @@
 #include <sys/resource.h>   /* for getrlimit */
 #include <fcntl.h>          /* for open */
 #include <syslog.h>         /* for openlog */
+#include <unistd.h>         /* for getpid */
+#include <string.h>         /* for strlen */
+#include <errno.h>          /* for EACCES */
 
 char abortStr[80];
 #define ABORT(...) \
@@ -13,6 +16,36 @@ char abortStr[80];
         perror(abortStr); \
         exit(1);
 
+#define LOCKFILE "/tmp/daemon.pid"
+#define LOCKMODE (S_IRUSR|S_IWUSR|S_IRGRP|S_IROTH)
+
+int alreadyRunning(void)
+{
+    int fd;
+    char buf[16];
+
+    fd = open(LOCKFILE, O_RDWR|O_CREAT, LOCKMODE);
+
+    if (fd < 0) {
+        syslog(LOG_ERR, "can't open %s: %s", LOCKFILE, strerror(errno));
+        exit(1);
+    }
+
+    if (lockf(fd, F_LOCK, 0) < 0) {
+        if (errno == EACCES || errno == EAGAIN) {
+            close(fd);
+            return 1;
+        }
+
+        syslog(LOG_ERR, "can't lock %s: %s", LOCKFILE, strerror(errno));
+        exit(1);
+    }
+
+    ftruncate(fd, 0);
+    sprintf(buf, "%ld", (long) getpid());
+    write(fd, buf, strlen(buf) + 1);
+    return 0;
+}
 
 /*
  * Daemons must be coded according to a few rules that prevent any unwanted
@@ -143,6 +176,14 @@ void daemonize(const char *cmd)
     }
 
     /*** Daemon initialization is finished ***/
+
+    /*
+     * Ensure the daemon is single-instance
+     */
+    if (alreadyRunning()) {
+        syslog(LOG_ERR, "DAEMON is already running");
+        exit(1);
+    }
 
     /*
      * The various syslog levels
