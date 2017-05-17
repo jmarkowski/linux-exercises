@@ -4,6 +4,7 @@ CFLAGS = -Wall
 PROG += checklen
 PROG += daemon
 PROG += envarg
+PROG += errno
 PROG += exec
 PROG += exit
 PROG += exitstatus
