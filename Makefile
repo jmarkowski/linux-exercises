@@ -41,6 +41,6 @@ getenv.o: getenv.c
 	$(CC) $(CFLAGS) -o $@ $<
 
 clean:
-	rm -f *.o
+	rm -f $(OBJ)
 
 .PHONY: all clean
