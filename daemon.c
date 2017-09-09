@@ -10,6 +10,24 @@
 #include <string.h>         /* for strlen */
 #include <errno.h>          /* for EACCES */
 
+/**
+ * Daemon conventions
+ *
+ * 1. Lock files are typically created and stored in /var/run (as su) with the
+ *    file name as x.pid, where x is the name of the daemon.
+ *
+ * 2. Configuration options are typically stored in /etc as x.conf, where x is
+ *    the name of daemon.
+ *
+ * 3. Daemons are typically started from a system initialization script in
+ *    /etc/systemd/
+ *
+ * 4. If a conf file exists, the daemon reads the file when it starts. Changes
+ *    to conf typically requires daemon restart.
+ *    Typically, to avoid restarting, SIGHUP signals are used to tell the daemon
+ *    to reread the conf file.
+ */
+
 char abortStr[80];
 #define ABORT(...) \
         sprintf(abortStr, __VA_ARGS__); \
