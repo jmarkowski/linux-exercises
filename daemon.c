@@ -49,7 +49,7 @@ int alreadyRunning(void)
         exit(1);
     }
 
-    if (lockf(fd, F_LOCK, 0) < 0) {
+    if (lockf(fd, F_TLOCK, 0) < 0) {
         if (errno == EACCES || errno == EAGAIN) {
             close(fd);
             return 1;
