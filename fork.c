@@ -1,25 +1,23 @@
 #include <stdio.h>
 #include <unistd.h>
 
-static int globalInt;
+static int k;
 
 void childFunc(pid_t pid)
 {
-    printf("Child work (pid = %d) (globalInt = %d)\n", pid, globalInt);
+    printf("[%d] (%d) Child fork (pid = %d.. useless now, "
+           "this was just a signal to know which PID is the child)\n",
+           getpid(), ++k, pid);
 }
 
 void parentFunc(pid_t pid)
 {
-    printf("Parent work (pid = %d) (globalInt = %d)\n", pid, globalInt);
+    printf("[%d] (%d) Parent fork (child pid = %d)\n", getpid(), ++k, pid);
 }
 
 int main(void)
 {
-    pid_t pid;
-
-    printf("Program start\n");
-
-    globalInt++;
+    printf("[%d] (%d) Program start\n", getpid(), ++k);
 
     /*
      * By flushing stdout, when the output is piped to a file, the output order
@@ -38,19 +36,21 @@ int main(void)
      * returns 0 in child process, the process ID of child in parent process, or
      * -1 on error
      */
+    pid_t pid;
+
     pid = fork();
 
-    if (pid == 0) {     /* child */
-        globalInt++;
+    if (pid == 0) {
         childFunc(pid);
-    } else {            /* parent */
-        globalInt++;
+    } else {
         parentFunc(pid);
     }
 
-    globalInt++;
-
-    printf("DONE (pid = %d) (gint=%d)\n", pid, globalInt);
+    if (pid == 0) {
+        printf("[%d] (%d) Child Program finished\n", getpid(), ++k);
+    } else {
+        printf("[%d] (%d) Parent Program finished\n", getpid(), ++k);
+    }
 
     return 0;
 }
