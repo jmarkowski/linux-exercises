@@ -181,7 +181,7 @@ void daemonize(const char *cmd)
      *  LOG_PID
      *
      * Valid facility:
-     *  LOG_DAEMON (amoung others)
+     *  LOG_DAEMON (among others)
      */
     openlog(cmd, LOG_CONS, LOG_DAEMON);
 
@@ -194,6 +194,17 @@ void daemonize(const char *cmd)
     }
 
     /*** Daemon initialization is finished ***/
+
+}
+
+int main(int argc, char *argv[])
+{
+    if (argc > 1) {
+        daemonize(argv[1]);
+    } else {
+        printf("Usage: %s <cmd>\n", argv[0]);
+        exit(0);
+    }
 
     /*
      * Ensure the daemon is single-instance
@@ -219,17 +230,9 @@ void daemonize(const char *cmd)
      * %m is replaced with error message string corresponding to value of errno
      */
     syslog(LOG_INFO, "DAEMON: DONE! (errno = %m)");
-}
 
-int main(int argc, char *argv[])
-{
-    if (argc > 1) {
-        daemonize(argv[1]);
-
-        exit(0);
-    } else {
-        printf("Usage: %s <cmd>\n", argv[0]);
-    }
-
-    exit(1);
+    /*
+     * Proceed with the rest of the daemon
+     */
+    exit(0);
 }
