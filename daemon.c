@@ -96,13 +96,13 @@ void daemonize(const char *cmd)
      * Create a new session and become the session leader to lose controlling
      * TTY.
      *
-     * A session is a collection ofone or more process groups. e.g. calling:
+     * A session is a collection of one or more process groups. e.g. calling:
      * $ proc1 | proc2    # This is a process group consisting of proc1 and
      *                    # proc2
      *
      * Calling setsid() causes three things:
      * 1. The forked child process becomes a session leader.
-     * 2. The process will becom ethe process group leader of a new process
+     * 2. The process will become the process group leader of a new process
      *    group.
      * 3. The process has no controlling terminal (if it had one before the
      *    call, the association between it and the terminal is broken)
@@ -157,15 +157,17 @@ void daemonize(const char *cmd)
     }
 
     /*
-     * Attach file descriptors 0, 1, and 2 to /dev/null.
+     * Now that all the file descriptors are closed, attach file descriptors
+     * 0, 1, and 2 (i.e. STDIN_FILENO, STDOUT_FILENO, STDERR_FILENO) to
+     * /dev/null.
      *
-     * The reason for this is that tehere is nowhere for output to be displayed,
+     * The reason for this is that there is nowhere for output to be displayed,
      * nor is there anywhere to receive input from an interactive user. The
      * daemon runs in the background.
      */
     fd0 = open("/dev/null", O_RDWR);
-    fd1 = dup(0);
-    fd2 = dup(0);
+    fd1 = dup(0); /* Get the next incremental available fd, duplicate of fd0 */
+    fd2 = dup(0); /* Get the next incremental available fd, duplicate of fd0 */
 
     /*
      * Initialize the log file.
@@ -187,7 +189,7 @@ void daemonize(const char *cmd)
 
     syslog(LOG_INFO, "DAEMON: file descriptors: %d, %d, %d", fd0, fd1, fd2);
 
-    if (fd0 != 0 || fd1 != 1 || fd2 != 2) {
+     if (fd0 != STDIN_FILENO || fd1 != STDOUT_FILENO || fd2 != STDERR_FILENO) {
         syslog(LOG_ERR, "DAEMON: Unexpected file descriptors %d %d %d",
                fd0, fd1, fd2);
         exit(1);
