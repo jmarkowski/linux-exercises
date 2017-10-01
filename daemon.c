@@ -37,6 +37,10 @@ char abortStr[80];
 #define LOCKFILE "/tmp/daemon.pid"
 #define LOCKMODE (S_IRUSR|S_IWUSR|S_IRGRP|S_IROTH)
 
+/*
+ * The purpose of this function is to ensure that the daemon is a single
+ * instance
+ */
 int alreadyRunning(void)
 {
     int fd;
@@ -46,10 +50,15 @@ int alreadyRunning(void)
 
     if (fd < 0) {
         syslog(LOG_ERR, "can't open %s: %s", LOCKFILE, strerror(errno));
-        exit(1);
+        return 1;
     }
 
-    if (lockf(fd, F_TLOCK, 0) < 0) {
+    if (lockf(fd, F_TEST, 8) == -1) {
+        syslog(LOG_ERR, "can't lock %s: %s", LOCKFILE, strerror(errno));
+        return 1;
+    }
+
+    if (lockf(fd, F_TLOCK, 8) < 0) {
         if (errno == EACCES || errno == EAGAIN) {
             close(fd);
             return 1;
@@ -76,14 +85,32 @@ void daemonize(const char *cmd)
     struct sigaction    sa;
     pid_t               pid;
     int k, fd0, fd1, fd2;
-    mode_t prevUMask;
+    mode_t prevUMask, newUMask = 0;
+
+    /*
+     * Initialize the log file.
+     *
+     * You can read the contents with $ journalctl -xe
+     *
+     * Valid options:
+     *  LOG_CONS
+     *  LOG_NDELAY
+     *  LOG_NOWAIT
+     *  LOG_ODELAY
+     *  LOG_PERROR
+     *  LOG_PID
+     *
+     * Valid facility:
+     *  LOG_DAEMON (among others)
+     */
+    openlog(cmd, LOG_CONS, LOG_DAEMON);
 
     /*
      * Clear file creation mask and set it to a known value.
      */
-    prevUMask = umask(0);
+    prevUMask = umask(newUMask);
 
-    printf("Previous umask: %u\n", prevUMask);
+    printf("umask change: %03o -> %03o\n", prevUMask, newUMask);
 
     /*
      * Get the maximum number of file descriptors.
@@ -110,7 +137,7 @@ void daemonize(const char *cmd)
     if ((pid = fork()) < 0) {
         ABORT("%s: can't fork", cmd);
     } else if (pid != 0) { /* parent */
-        printf("Parent closed\n");
+        syslog(LOG_INFO, "Parent [%d] closed (child [%d] lives on)\n", getpid(), pid);
         exit(0);
     }
 
@@ -130,6 +157,8 @@ void daemonize(const char *cmd)
     if ((pid = fork()) < 0) {
         ABORT("%s: can't fork", cmd);
     } else if (pid != 0) { /* parent */
+        syslog(LOG_INFO, "Parent [%d] closed (child [%d] lives on)", getpid(),
+               pid);
         exit(0);
     }
 
@@ -169,24 +198,6 @@ void daemonize(const char *cmd)
     fd1 = dup(0); /* Get the next incremental available fd, duplicate of fd0 */
     fd2 = dup(0); /* Get the next incremental available fd, duplicate of fd0 */
 
-    /*
-     * Initialize the log file.
-     *
-     * You can read the contents with $ journalctl -xe
-     *
-     * Valid options:
-     *  LOG_CONS
-     *  LOG_NDELAY
-     *  LOG_NOWAIT
-     *  LOG_ODELAY
-     *  LOG_PERROR
-     *  LOG_PID
-     *
-     * Valid facility:
-     *  LOG_DAEMON (among others)
-     */
-    openlog(cmd, LOG_CONS, LOG_DAEMON);
-
     syslog(LOG_INFO, "DAEMON: file descriptors: %d, %d, %d", fd0, fd1, fd2);
 
      if (fd0 != STDIN_FILENO || fd1 != STDOUT_FILENO || fd2 != STDERR_FILENO) {
@@ -199,42 +210,31 @@ void daemonize(const char *cmd)
 
 }
 
-int main(int argc, char *argv[])
+void daemonTask(void)
 {
-    if (argc > 1) {
-        daemonize(argv[1]);
-    } else {
-        printf("Usage: %s <cmd>\n", argv[0]);
-        exit(0);
-    }
+    syslog(LOG_INFO, "Run daemon (sleep 30 seconds) (%s is %d)",
+           LOCKFILE, getpid());
 
-    /*
-     * Ensure the daemon is single-instance
-     */
-    if (alreadyRunning()) {
-        syslog(LOG_ERR, "DAEMON is already running");
-        exit(1);
-    }
-
-    /*
-     * The various syslog levels
-     */
-    syslog(LOG_DEBUG,   "DAEMON: LOG_DEBUG (debug - lowest priority)");
-    syslog(LOG_INFO,    "DAEMON: LOG_INFO (informational message)");
-    syslog(LOG_NOTICE,  "DAEMON: LOG_NOTICE (normal, but significant condition)");
-    syslog(LOG_WARNING, "DAEMON: LOG_WARNING (warning condition)");
-    syslog(LOG_ERR,     "DAEMON: LOG_ERR (error condition)");
-    syslog(LOG_CRIT,    "DAEMON: LOG_CRIT (critical condition, e.g. hard device error)");
-    syslog(LOG_ALERT,   "DAEMON: LOG_ALERT (condition that must be fixed immediately)");
-    syslog(LOG_EMERG,   "DAEMON: LOG_EMERG (emergency, system is unusable - highest priority)");
+    sleep(30); /* Run daemon for 30 seconds */
 
     /*
      * %m is replaced with error message string corresponding to value of errno
      */
     syslog(LOG_INFO, "DAEMON: DONE! (errno = %m)");
+}
 
-    /*
-     * Proceed with the rest of the daemon
-     */
+int main(int argc, char *argv[])
+{
+    printf("Type 'journal -xe' to see DAEMON logs\n");
+
+    daemonize("DAEMON");
+
+    if (alreadyRunning()) {
+        syslog(LOG_ERR, "Aborting since daemon is already running");
+        exit(1);
+    }
+
+    daemonTask();
+
     exit(0);
 }
