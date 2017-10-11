@@ -2,6 +2,7 @@ CC = gcc -std=gnu11
 CFLAGS = -Wall -O0 -ggdb
 
 PROG += checklen
+PROG += cp
 PROG += daemon
 PROG += envarg
 PROG += errno
