@@ -6,6 +6,22 @@
 /**
  * This file simply demonstrates the differences between open a file using the
  * file descriptor method vs the file pointer method.
+ *
+ * Using file descriptors is a form of "unbuffered I/O", which means that for
+ * every read/write function call, this is a system call to the kernel, and
+ * we're guaranteeing that the I/O occurs before continuing.
+ *
+ * Use file pointers is a form of "buffered I/O", which typically revolves
+ * around the notion of "streams". Buffered I/O is less disk intensive and
+ * allows the OS to buffer the read/write operations before they are carried out
+ * (or if they are flushed).
+ *
+ * When should one use buffered vs unbuffered I/O?
+ *
+ * Basically, you'll want to always use buffered I/O, unless you require data
+ * that is read or written to take place immediately (think of the stderr
+ * stream). If you're logging data, and an error occurs, you'd like the error to
+ * be logged before aborting from the program.
  */
 
 #define SIZE 80
