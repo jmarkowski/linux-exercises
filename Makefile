@@ -15,6 +15,7 @@ PROG += getenv
 PROG += mymalloc
 PROG += mutexes
 PROG += pid
+PROG += pipe
 PROG += resinfo
 PROG += signals
 PROG += sleep
