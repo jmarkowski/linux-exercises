@@ -12,6 +12,7 @@ PROG += exitstatus
 PROG += fdvsfp
 PROG += fork
 PROG += getenv
+PROG += ipc
 PROG += mymalloc
 PROG += mutexes
 PROG += pid
@@ -30,6 +31,9 @@ SRC = $(addsuffix .c, $(PROG))
 OBJ = $(addsuffix .o, $(PROG))
 
 all: $(OBJ)
+
+ipc.o: ipc.c
+	$(CC) $(CFLAGS) -pthread -o $@ $<
 
 threads.o: threads.c
 	$(CC) $(CFLAGS) -pthread -o $@ $<
