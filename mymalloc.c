@@ -18,7 +18,7 @@ static Header_t base;     /* empty list to get started */
 static Header_t *freePtr = NULL;    /* start of list of free memory blocks */
 
 /*
- * Minimum number of units to request. Don't make too small as ifetching memory
+ * Minimum number of units to request. Don't make too small as fetching memory
  * will get intensive otherwise
  */
 void myfree(void *ap)
@@ -60,7 +60,7 @@ void myfree(void *ap)
 /*
  * Obtain storage from the operating system
  * Since asking the system for memory is a relatively expensive operation, we
- * don't want to do that on every call to malloc, so morecore requests at lEast
+ * don't want to do that on every call to malloc, so morecore requests at least
  * NALLOC units, which is chopped up as needed.
  */
 static Header_t *morecore(unsigned nunits)
