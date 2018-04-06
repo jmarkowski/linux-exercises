@@ -24,6 +24,7 @@ PROG += sleep
 PROG += sysinfo
 PROG += tee
 PROG += termcolors
+PROG += terminal-io-attr
 PROG += threads
 PROG += userinfo
 
