@@ -26,6 +26,7 @@ PROG += tee
 PROG += termcolors
 PROG += terminal-io-attr
 PROG += threads
+PROG += ttyinfo
 PROG += userinfo
 
 SRC = $(addsuffix .c, $(PROG))
